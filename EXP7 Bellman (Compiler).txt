@@ -1,0 +1,110 @@
+#include <stdio.h>
+#include <limits.h>
+#include <malloc.h>
+
+struct Edge {
+    int src, dest, weight;
+};
+
+struct Graph {
+    int V, E;
+    struct Edge* edge;
+};
+
+struct Graph* createGraph(int V, int E)
+{
+    struct Graph* graph = (struct Graph*)malloc(sizeof(struct Graph));
+    graph->V = V;
+    graph->E = E;
+    graph->edge = (struct Edge*)malloc(E * sizeof(struct Edge));
+    return graph;
+}
+
+void printArr(int* dist, int n)
+{
+    printf("Vertex Distance from Source\n");
+    for (int i = 0; i < n; ++i)
+        printf("%d \t\t %d\n", i, dist[i]);
+}
+
+void BellmanFord(struct Graph* graph, int src)
+{
+    int V = graph->V;
+    int E = graph->E;
+    int* dist = (int*)malloc(V * sizeof(int));
+
+    for (int i = 0; i < V; i++)
+        dist[i] = INT_MAX;
+    dist[src] = 0;
+
+    int i1, j1;
+    for (i1 = 1; i1 <= V - 1; i1++) {
+        for (j1 = 0; j1 < E; j1++) {
+            int u = graph->edge[j1].src;
+            int v = graph->edge[j1].dest;
+            int weight = graph->edge[j1].weight;
+            if (dist[u] != INT_MAX
+                && dist[u] + weight < dist[v])
+                dist[v] = dist[u] + weight;
+        }
+    }
+
+    for (i1 = 0; i1 < E; i1++) {
+        int u = graph->edge[i1].src;
+        int v = graph->edge[i1].dest;
+        int weight = graph->edge[i1].weight;
+        if (dist[u] != INT_MAX
+            && dist[u] + weight < dist[v]) {
+            printf("Graph contains negative weight cycle");
+            free(dist);
+            return;
+        }
+    }
+
+    printArr(dist, V);
+    free(dist);
+    return;
+}
+
+int main()
+{
+    int V = 5;
+    int E = 8;
+    struct Graph* graph = createGraph(V, E);
+
+    graph->edge[0].src = 0;
+    graph->edge[0].dest = 1;
+    graph->edge[0].weight = -1;
+
+    graph->edge[1].src = 0;
+    graph->edge[1].dest = 2;
+    graph->edge[1].weight = 4;
+
+    graph->edge[2].src = 1;
+    graph->edge[2].dest = 2;
+    graph->edge[2].weight = 3;
+
+    graph->edge[3].src = 1;
+    graph->edge[3].dest = 3;
+    graph->edge[3].weight = 2;
+
+    graph->edge[4].src = 1;
+    graph->edge[4].dest = 4;
+    graph->edge[4].weight = 2;
+
+    graph->edge[5].src = 3;
+    graph->edge[5].dest = 2;
+    graph->edge[5].weight = 5;
+
+    graph->edge[6].src = 3;
+    graph->edge[6].dest = 1;
+    graph->edge[6].weight = 1;
+
+    graph->edge[7].src = 4;
+    graph->edge[7].dest = 3;
+    graph->edge[7].weight = -3;
+
+    BellmanFord(graph, 0);
+
+    return 0;
+}
